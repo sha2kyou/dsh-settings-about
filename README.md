@@ -41,6 +41,16 @@ dsh plugin --profile web add ./dsh-settings-about
 
 Then open **Settings → About**.
 
+Update (GitHub install):
+
+```sh
+dsh plugin --profile web update dsh-settings-about
+# same effect for this github: spec:
+# dsh plugin --profile web add github:sha2kyou/dsh-settings-about
+```
+
+Local checkout: `git pull` in the clone, then restart `dsh web` (a `link:`/`path` install already points at that directory).
+
 Uninstall:
 
 ```sh

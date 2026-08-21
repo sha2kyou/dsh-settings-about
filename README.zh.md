@@ -41,6 +41,16 @@ dsh plugin --profile web add ./dsh-settings-about
 
 然后打开 **设置 → 关于**。
 
+更新（GitHub 安装）：
+
+```sh
+dsh plugin --profile web update dsh-settings-about
+# 对本仓库的 github: 规格，再执行一次 add 效果相同：
+# dsh plugin --profile web add github:sha2kyou/dsh-settings-about
+```
+
+本地目录：在 clone 里 `git pull` 后重启 `dsh web` 即可（`link:` / 路径安装会直接指向该目录）。
+
 卸载：
 
 ```sh
