@@ -84,17 +84,17 @@ window.__ModuleLoader__.load({
 .dshAbout_pluginsCount{color:var(--dsw-alias-label-tertiary);font-variant-numeric:tabular-nums;font-size:13px;line-height:22px}
 .dshAbout_pluginsChevron{color:var(--dsw-alias-label-tertiary);flex:none;width:16px;height:16px;margin-left:2px;transition:transform .14s ease}
 .dshAbout_pluginsToggle[aria-expanded=true] .dshAbout_pluginsChevron{transform:rotate(90deg)}
-.dshAbout_tableWrap{border:1px solid var(--dsw-alias-border-l2);border-radius:10px;overflow:auto;max-height:min(420px,55vh)}
-.dshAbout_table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;line-height:20px}
-.dshAbout_table th{text-align:left;color:var(--dsw-alias-label-tertiary);font-weight:500;padding:12px 14px;background:var(--dsw-alias-bg-layer-1);position:sticky;top:0}
-.dshAbout_table td{padding:12px 14px;border-top:1px solid var(--dsw-alias-border-l2);vertical-align:top;overflow-wrap:anywhere;font-family:var(--ds-font-family-code, ui-monospace, SFMono-Regular, Menlo, monospace)}
+.dshAbout_tableWrap{border:1px solid var(--dsw-alias-border-l2);border-radius:8px;overflow:auto;max-height:min(360px,50vh)}
+.dshAbout_table{width:100%;border-collapse:collapse;font-size:12px;line-height:18px}
+.dshAbout_table th{text-align:left;color:var(--dsw-alias-label-tertiary);font-weight:500;padding:8px 10px;background:var(--dsw-alias-bg-layer-1);position:sticky;top:0}
+.dshAbout_table td{padding:7px 10px;border-top:1px solid var(--dsw-alias-border-l2);vertical-align:top;overflow-wrap:anywhere;font-family:var(--ds-font-family-code, ui-monospace, SFMono-Regular, Menlo, monospace)}
 .dshAbout_phase[data-phase=active]{color:var(--dsw-alias-state-success-primary)}
 .dshAbout_phase[data-phase=failed]{color:var(--dsw-alias-state-error-primary)}
 .dshAbout_phase[data-phase=loading],.dshAbout_phase[data-phase=pending]{color:var(--dsw-alias-state-business-primary)}
 @media (prefers-reduced-motion:reduce){.dshAbout_pluginsChevron{transition:none}}
 `.trim()
 
-    const tagId = 'dsh-settings-about/AboutSection.css.v3'
+    const tagId = 'dsh-settings-about/AboutSection.css.v4'
     if (typeof document !== 'undefined') {
       const old = document.querySelector('style[data-plugin="dsh-settings-about"]')
       if (old && old.dataset.pluginCss !== tagId) old.remove()
