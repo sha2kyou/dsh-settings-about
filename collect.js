@@ -28,7 +28,49 @@ import { fileURLToPath } from 'node:url'
  * @property {string | null} version From that package's package.json when resolvable; null otherwise
  * @property {boolean} enabled
  * @property {string | null} fiberPhase
+ * @property {boolean | null} builtin
+ *   `false` when the package is a key of the profile `package.json` `dependencies`
+ *   (what `dsh plugin add` writes). `true` when profile deps are known and the
+ *   package is not listed (in-box / pulled in by profile bundles). `null` when
+ *   profile deps could not be read — never invent provenance.
  */
+
+/**
+ * Read dependency package names from a profile package.json.
+ * These are the packages `dsh plugin add` installs into the profile.
+ * @param {string | undefined} profileDir
+ * @returns {Set<string> | undefined} undefined when unreadable — caller must not guess
+ */
+export function readProfileDependencyNames(profileDir) {
+  if (typeof profileDir !== 'string' || profileDir.length === 0) return undefined
+  const manifest = readPackageJson(join(profileDir, 'package.json'))
+  if (manifest === undefined) return undefined
+  const deps = manifest.dependencies
+  if (deps === null || typeof deps !== 'object' || Array.isArray(deps)) return undefined
+  /** @type {Set<string>} */
+  const names = new Set()
+  for (const key of Object.keys(deps)) {
+    if (typeof key === 'string' && key.length > 0) names.add(key)
+  }
+  return names
+}
+
+/**
+ * Classify builtin vs profile-installed from profile dependencies only.
+ * Loader entries have no official provenance (see dsh-host-plugin-inventory).
+ * @param {string} moduleName
+ * @param {Set<string> | undefined} profileDeps
+ * @returns {boolean | null}
+ */
+export function classifyPluginBuiltin(moduleName, profileDeps) {
+  if (profileDeps === undefined) return null
+  const packageName = packageNameOfSpecifier(moduleName)
+  if (packageName === undefined) {
+    // Protocol / non-package specs (e.g. cordis:include) are not profile deps.
+    return true
+  }
+  return !profileDeps.has(packageName)
+}
 
 /**
  * @typedef {object} AboutSnapshot
@@ -319,6 +361,7 @@ export function resolvePluginVersion(moduleName, anchors = {}) {
  */
 export function listInstalledPlugins(loader, anchors = {}) {
   if (loader === undefined || loader === null || typeof loader.entries !== 'function') return []
+  const profileDeps = readProfileDependencyNames(anchors.profileDir)
   /** @type {Map<string, string | null>} */
   const versionCache = new Map()
   /** @type {InstalledPlugin[]} */
@@ -347,6 +390,7 @@ export function listInstalledPlugins(loader, anchors = {}) {
       version,
       enabled: !entry.disabled,
       fiberPhase,
+      builtin: classifyPluginBuiltin(moduleName, profileDeps),
     })
   }
   return plugins
@@ -506,7 +550,7 @@ export function collectAboutSnapshot(options = {}) {
     ...notes.map((n) => `note: ${n}`),
     'plugins:',
     ...plugins.map((p) =>
-      `  - ${p.entryId}\t${p.moduleName}\tversion=${p.version ?? 'null'}\tenabled=${p.enabled}\tphase=${p.fiberPhase ?? 'null'}`
+      `  - ${p.entryId}\t${p.moduleName}\tversion=${p.version ?? 'null'}\tenabled=${p.enabled}\tphase=${p.fiberPhase ?? 'null'}\tbuiltin=${p.builtin === null ? 'null' : String(p.builtin)}`
     ),
     '',
   ].join('\n')

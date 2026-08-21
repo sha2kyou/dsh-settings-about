@@ -4,6 +4,8 @@
 
 DeepSeek Harness（`dsh`）插件：在 **设置 → 关于** 展示**当前正在运行的** dsh 进程核实信息，以及已安装插件清单（id、模块、版本、启用、fiber 状态）。
 
+![设置 → 关于](docs/settings-about.png)
+
 ## 版本限制（必读）
 
 | 项 | 限制 |
@@ -33,7 +35,8 @@ dsh web
 本地目录：
 
 ```sh
-dsh plugin --profile web add /path/to/dsh-settings-about
+git clone https://github.com/sha2kyou/dsh-settings-about.git
+dsh plugin --profile web add ./dsh-settings-about
 ```
 
 然后打开 **设置 → 关于**。
@@ -67,7 +70,7 @@ node scripts/patch-about-nav-icon.mjs
 | Node / 平台 | `process.version` / `platform` / `arch` |
 | Profile / bundles | argv / 路径 / `$DSH_HOME/profiles/<name>/package.json` |
 | Listen | 请求时的 `webServer.host:port` |
-| 已安装插件 | Cordis Loader 条目（版本来自可解析的 `package.json`） |
+| 已安装插件 | Cordis Loader 条目（版本来自可解析的 `package.json`）。`builtin` 仅按 profile `dependencies` 判定（Loader 无官方来源）。UI 可隐藏 `builtin: true`。 |
 
 ## 文件结构
 

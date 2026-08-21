@@ -4,6 +4,8 @@
 
 DeepSeek Harness (`dsh`) plugin that adds **Settings → About**: verified runtime facts from the *currently running* `dsh` process, plus an installed-plugin inventory (id, module, version, enabled, fiber phase).
 
+![Settings → About](docs/settings-about.png)
+
 ## Version requirements (important)
 
 | Requirement | Constraint |
@@ -33,7 +35,8 @@ dsh web
 Local checkout:
 
 ```sh
-dsh plugin --profile web add /path/to/dsh-settings-about
+git clone https://github.com/sha2kyou/dsh-settings-about.git
+dsh plugin --profile web add ./dsh-settings-about
 ```
 
 Then open **Settings → About**.
@@ -67,7 +70,7 @@ Values are collected from the running process only — missing data is omitted o
 | Node / platform | `process.version` / `platform` / `arch` |
 | Profile / bundles | argv / profile path / `$DSH_HOME/profiles/<name>/package.json` |
 | Listen | Live `webServer.host:port` |
-| Installed plugins | Cordis Loader entries (+ `package.json` version when resolvable) |
+| Installed plugins | Cordis Loader entries (+ `package.json` version when resolvable). `builtin` is derived from profile `dependencies` only (no Loader provenance). UI can hide `builtin: true`. |
 
 ## Layout
 

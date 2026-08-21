@@ -22,8 +22,11 @@ window.__ModuleLoader__.load({
       empty: '没有可展示的字段（宿主未能解析运行中的 dsh）。',
       plugins: '已安装插件',
       pluginsEmpty: '当前没有可列出的 Loader 插件条目。',
+      pluginsEmptyFiltered: '没有非内置插件（当前过滤隐藏了内置项）。',
       pluginsExpand: '展开插件列表',
       pluginsCollapse: '收起插件列表',
+      pluginsHideBuiltin: '隐藏内置插件',
+      pluginsHideBuiltinHint: '内置 = 不在当前 profile 的 package.json dependencies 中（由 bundles 带入）；用户安装的包会出现在 dependencies。',
       colId: 'ID',
       colModule: '模块',
       colVersion: '版本',
@@ -48,8 +51,11 @@ window.__ModuleLoader__.load({
       empty: 'No fields to show (host could not resolve the running dsh).',
       plugins: 'Installed Plugins',
       pluginsEmpty: 'No Loader plugin entries to list.',
+      pluginsEmptyFiltered: 'No non-builtin plugins (builtins are hidden by the filter).',
       pluginsExpand: 'Expand plugin list',
       pluginsCollapse: 'Collapse plugin list',
+      pluginsHideBuiltin: 'Hide built-in plugins',
+      pluginsHideBuiltinHint: 'Built-in = not listed in this profile’s package.json dependencies (pulled in by bundles). Packages from dsh plugin add appear in dependencies.',
       colId: 'ID',
       colModule: 'Module',
       colVersion: 'Version',
@@ -84,6 +90,10 @@ window.__ModuleLoader__.load({
 .dshAbout_pluginsCount{color:var(--dsw-alias-label-tertiary);font-variant-numeric:tabular-nums;font-size:13px;line-height:22px}
 .dshAbout_pluginsChevron{color:var(--dsw-alias-label-tertiary);flex:none;width:16px;height:16px;margin-left:2px;transition:transform .14s ease}
 .dshAbout_pluginsToggle[aria-expanded=true] .dshAbout_pluginsChevron{transform:rotate(90deg)}
+.dshAbout_pluginsFilter{align-items:flex-start;gap:8px;display:flex;margin:0;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px;cursor:pointer;user-select:none}
+.dshAbout_pluginsFilter input{margin:2px 0 0;flex:none}
+.dshAbout_pluginsFilterText{flex-direction:column;gap:2px;display:flex;min-width:0}
+.dshAbout_pluginsFilterHint{color:var(--dsw-alias-label-tertiary);font-size:11px;line-height:16px}
 .dshAbout_tableWrap{border:1px solid var(--dsw-alias-border-l2);border-radius:8px;overflow:auto;max-height:min(360px,50vh)}
 .dshAbout_table{width:100%;border-collapse:collapse;font-size:12px;line-height:18px}
 .dshAbout_table th{text-align:left;color:var(--dsw-alias-label-tertiary);font-weight:500;padding:8px 10px;background:var(--dsw-alias-bg-layer-1);position:sticky;top:0}
@@ -94,7 +104,7 @@ window.__ModuleLoader__.load({
 @media (prefers-reduced-motion:reduce){.dshAbout_pluginsChevron{transition:none}}
 `.trim()
 
-    const tagId = 'dsh-settings-about/AboutSection.css.v4'
+    const tagId = 'dsh-settings-about/AboutSection.css.v5'
     if (typeof document !== 'undefined') {
       const old = document.querySelector('style[data-plugin="dsh-settings-about"]')
       if (old && old.dataset.pluginCss !== tagId) old.remove()
@@ -132,6 +142,7 @@ window.__ModuleLoader__.load({
       const [state, setState] = React.useState({ status: 'loading' })
       const [copyState, setCopyState] = React.useState('idle')
       const [pluginsOpen, setPluginsOpen] = React.useState(false)
+      const [hideBuiltin, setHideBuiltin] = React.useState(true)
 
       const load = React.useCallback(async () => {
         setState({ status: 'loading' })
@@ -191,6 +202,12 @@ window.__ModuleLoader__.load({
       const linkRows = Array.isArray(links) ? links : []
       const noteRows = Array.isArray(notes) ? notes : []
       const pluginRows = Array.isArray(plugins) ? plugins : []
+      const visiblePluginRows = hideBuiltin
+        ? pluginRows.filter((row) => row.builtin !== true)
+        : pluginRows
+      const pluginCountLabel = hideBuiltin && pluginRows.length !== visiblePluginRows.length
+        ? `${visiblePluginRows.length}/${pluginRows.length}`
+        : String(pluginRows.length)
 
       return React.createElement('div', { className: 'dshAbout_section' },
         React.createElement('h2', { className: 'dshAbout_title' }, t('title')),
@@ -213,39 +230,54 @@ window.__ModuleLoader__.load({
             onClick: () => setPluginsOpen((open) => !open),
           },
             React.createElement('span', { className: 'dshAbout_pluginsLabel' }, t('plugins')),
-            React.createElement('span', { className: 'dshAbout_pluginsCount' }, String(pluginRows.length)),
+            React.createElement('span', { className: 'dshAbout_pluginsCount' }, pluginCountLabel),
             React.createElement(Chevron, { open: pluginsOpen }),
           ),
           pluginsOpen
-            ? (pluginRows.length === 0
-              ? React.createElement('p', { className: 'dshAbout_status' }, t('pluginsEmpty'))
-              : React.createElement('div', { className: 'dshAbout_tableWrap' },
-                React.createElement('table', { className: 'dshAbout_table' },
-                  React.createElement('thead', null,
-                    React.createElement('tr', null,
-                      React.createElement('th', null, t('colId')),
-                      React.createElement('th', null, t('colModule')),
-                      React.createElement('th', null, t('colVersion')),
-                      React.createElement('th', null, t('colEnabled')),
-                      React.createElement('th', null, t('colPhase')),
-                    ),
-                  ),
-                  React.createElement('tbody', null,
-                    ...pluginRows.map((row) =>
-                      React.createElement('tr', { key: row.entryId },
-                        React.createElement('td', null, row.entryId),
-                        React.createElement('td', null, row.moduleName),
-                        React.createElement('td', null, row.version ?? t('versionNull')),
-                        React.createElement('td', null, row.enabled ? t('enabledYes') : t('enabledNo')),
-                        React.createElement('td', {
-                          className: 'dshAbout_phase',
-                          'data-phase': row.fiberPhase ?? '',
-                        }, row.fiberPhase ?? t('phaseNull')),
+            ? React.createElement(React.Fragment, null,
+              React.createElement('label', { className: 'dshAbout_pluginsFilter' },
+                React.createElement('input', {
+                  type: 'checkbox',
+                  checked: hideBuiltin,
+                  onChange: (event) => setHideBuiltin(Boolean(event.target.checked)),
+                }),
+                React.createElement('span', { className: 'dshAbout_pluginsFilterText' },
+                  React.createElement('span', null, t('pluginsHideBuiltin')),
+                  React.createElement('span', { className: 'dshAbout_pluginsFilterHint' }, t('pluginsHideBuiltinHint')),
+                ),
+              ),
+              pluginRows.length === 0
+                ? React.createElement('p', { className: 'dshAbout_status' }, t('pluginsEmpty'))
+                : visiblePluginRows.length === 0
+                  ? React.createElement('p', { className: 'dshAbout_status' }, t('pluginsEmptyFiltered'))
+                  : React.createElement('div', { className: 'dshAbout_tableWrap' },
+                    React.createElement('table', { className: 'dshAbout_table' },
+                      React.createElement('thead', null,
+                        React.createElement('tr', null,
+                          React.createElement('th', null, t('colId')),
+                          React.createElement('th', null, t('colModule')),
+                          React.createElement('th', null, t('colVersion')),
+                          React.createElement('th', null, t('colEnabled')),
+                          React.createElement('th', null, t('colPhase')),
+                        ),
+                      ),
+                      React.createElement('tbody', null,
+                        ...visiblePluginRows.map((row) =>
+                          React.createElement('tr', { key: row.entryId },
+                            React.createElement('td', null, row.entryId),
+                            React.createElement('td', null, row.moduleName),
+                            React.createElement('td', null, row.version ?? t('versionNull')),
+                            React.createElement('td', null, row.enabled ? t('enabledYes') : t('enabledNo')),
+                            React.createElement('td', {
+                              className: 'dshAbout_phase',
+                              'data-phase': row.fiberPhase ?? '',
+                            }, row.fiberPhase ?? t('phaseNull')),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ))
+            )
             : null,
         ),
         linkRows.length > 0
