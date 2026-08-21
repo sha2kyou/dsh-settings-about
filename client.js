@@ -22,6 +22,8 @@ window.__ModuleLoader__.load({
       empty: '没有可展示的字段（宿主未能解析运行中的 dsh）。',
       plugins: '已安装插件',
       pluginsEmpty: '当前没有可列出的 Loader 插件条目。',
+      pluginsExpand: '展开插件列表',
+      pluginsCollapse: '收起插件列表',
       colId: 'ID',
       colModule: '模块',
       colVersion: '版本',
@@ -46,6 +48,8 @@ window.__ModuleLoader__.load({
       empty: 'No fields to show (host could not resolve the running dsh).',
       plugins: 'Installed Plugins',
       pluginsEmpty: 'No Loader plugin entries to list.',
+      pluginsExpand: 'Expand plugin list',
+      pluginsCollapse: 'Collapse plugin list',
       colId: 'ID',
       colModule: 'Module',
       colVersion: 'Version',
@@ -58,44 +62,76 @@ window.__ModuleLoader__.load({
     }
 
     const css = `
-.dshAbout_section{width:100%;max-width:760px;color:var(--dsw-alias-label-primary);flex-direction:column;gap:16px;display:flex}
+.dshAbout_section{width:100%;max-width:760px;color:var(--dsw-alias-label-primary);flex-direction:column;gap:18px;display:flex}
 .dshAbout_title{margin:0;font-size:16px;font-weight:500;line-height:24px}
 .dshAbout_subtitle{margin:0;font-size:14px;font-weight:500;line-height:22px}
 .dshAbout_status,.dshAbout_notes li{margin:0;color:var(--dsw-alias-label-tertiary);font-size:13px;line-height:20px}
 .dshAbout_error{color:var(--dsw-alias-state-error-primary);align-items:center;gap:10px;display:flex;font-size:13px;line-height:20px}
 .dshAbout_error button,.dshAbout_actions button{border:1px solid var(--dsw-alias-border-l2);color:var(--dsw-alias-label-primary);font:inherit;cursor:pointer;background:0 0;border-radius:6px;padding:4px 10px}
-.dshAbout_dl{grid-template-columns:140px minmax(0,1fr);gap:8px 14px;margin:0;display:grid}
+.dshAbout_dl{grid-template-columns:148px minmax(0,1fr);gap:10px 16px;margin:0;display:grid}
 .dshAbout_dl div{display:contents}
-.dshAbout_dl dt{color:var(--dsw-alias-label-tertiary);font-size:12px;line-height:18px}
-.dshAbout_dl dd{overflow-wrap:anywhere;min-width:0;margin:0;color:var(--dsw-alias-label-primary);font-size:13px;line-height:18px;font-family:var(--ds-font-family-code, ui-monospace, SFMono-Regular, Menlo, monospace)}
+.dshAbout_dl dt{color:var(--dsw-alias-label-tertiary);font-size:12px;line-height:20px}
+.dshAbout_dl dd{overflow-wrap:anywhere;min-width:0;margin:0;color:var(--dsw-alias-label-primary);font-size:13px;line-height:20px;font-family:var(--ds-font-family-code, ui-monospace, SFMono-Regular, Menlo, monospace)}
 .dshAbout_links{flex-direction:column;gap:6px;display:flex;margin:0;padding:0;list-style:none}
 .dshAbout_links a{color:var(--dsw-alias-state-business-primary);font-size:13px;line-height:20px}
 .dshAbout_notes{margin:0;padding-left:18px}
 .dshAbout_actions{display:flex;gap:8px;align-items:center}
 .dshAbout_hint{color:var(--dsw-alias-label-tertiary);font-size:12px;line-height:18px}
-.dshAbout_plugins{flex-direction:column;gap:8px;display:flex}
-.dshAbout_tableWrap{border:1px solid var(--dsw-alias-border-l2);border-radius:8px;overflow:auto;max-height:min(360px,50vh)}
-.dshAbout_table{width:100%;border-collapse:collapse;font-size:12px;line-height:18px}
-.dshAbout_table th{text-align:left;color:var(--dsw-alias-label-tertiary);font-weight:500;padding:8px 10px;background:var(--dsw-alias-bg-layer-1);position:sticky;top:0}
-.dshAbout_table td{padding:7px 10px;border-top:1px solid var(--dsw-alias-border-l2);vertical-align:top;overflow-wrap:anywhere;font-family:var(--ds-font-family-code, ui-monospace, SFMono-Regular, Menlo, monospace)}
+.dshAbout_plugins{flex-direction:column;gap:12px;display:flex}
+.dshAbout_pluginsToggle{box-sizing:border-box;width:100%;margin:0;padding:0;border:none;background:0 0;color:inherit;font:inherit;cursor:pointer;align-items:center;gap:8px;display:flex;text-align:left}
+.dshAbout_pluginsToggle:hover .dshAbout_pluginsLabel{color:var(--dsw-alias-state-business-primary)}
+.dshAbout_pluginsLabel{font-size:14px;font-weight:500;line-height:22px}
+.dshAbout_pluginsCount{color:var(--dsw-alias-label-tertiary);font-variant-numeric:tabular-nums;font-size:13px;line-height:22px}
+.dshAbout_pluginsChevron{color:var(--dsw-alias-label-tertiary);flex:none;width:16px;height:16px;margin-left:2px;transition:transform .14s ease}
+.dshAbout_pluginsToggle[aria-expanded=true] .dshAbout_pluginsChevron{transform:rotate(90deg)}
+.dshAbout_tableWrap{border:1px solid var(--dsw-alias-border-l2);border-radius:10px;overflow:auto;max-height:min(420px,55vh)}
+.dshAbout_table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;line-height:20px}
+.dshAbout_table th{text-align:left;color:var(--dsw-alias-label-tertiary);font-weight:500;padding:12px 14px;background:var(--dsw-alias-bg-layer-1);position:sticky;top:0}
+.dshAbout_table td{padding:12px 14px;border-top:1px solid var(--dsw-alias-border-l2);vertical-align:top;overflow-wrap:anywhere;font-family:var(--ds-font-family-code, ui-monospace, SFMono-Regular, Menlo, monospace)}
 .dshAbout_phase[data-phase=active]{color:var(--dsw-alias-state-success-primary)}
 .dshAbout_phase[data-phase=failed]{color:var(--dsw-alias-state-error-primary)}
 .dshAbout_phase[data-phase=loading],.dshAbout_phase[data-phase=pending]{color:var(--dsw-alias-state-business-primary)}
+@media (prefers-reduced-motion:reduce){.dshAbout_pluginsChevron{transition:none}}
 `.trim()
 
-    const tagId = 'dsh-settings-about/AboutSection.css'
-    if (typeof document !== 'undefined' && document.querySelector('style[data-plugin-css=' + JSON.stringify(tagId) + ']') === null) {
-      const tag = document.createElement('style')
-      tag.dataset.plugin = 'dsh-settings-about'
-      tag.dataset.pluginCss = tagId
-      tag.textContent = css
-      document.head.appendChild(tag)
+    const tagId = 'dsh-settings-about/AboutSection.css.v3'
+    if (typeof document !== 'undefined') {
+      const old = document.querySelector('style[data-plugin="dsh-settings-about"]')
+      if (old && old.dataset.pluginCss !== tagId) old.remove()
+      if (document.querySelector('style[data-plugin-css=' + JSON.stringify(tagId) + ']') === null) {
+        const tag = document.createElement('style')
+        tag.dataset.plugin = 'dsh-settings-about'
+        tag.dataset.pluginCss = tagId
+        tag.textContent = css
+        document.head.appendChild(tag)
+      }
+    }
+
+    function Chevron({ open }) {
+      return React.createElement('svg', {
+        className: 'dshAbout_pluginsChevron',
+        viewBox: '0 0 16 16',
+        width: 16,
+        height: 16,
+        'aria-hidden': 'true',
+        focusable: 'false',
+      },
+        React.createElement('path', {
+          d: 'M6 3.5 10.5 8 6 12.5',
+          fill: 'none',
+          stroke: 'currentColor',
+          strokeWidth: 1.5,
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round',
+        }),
+      )
     }
 
     function AboutSection(props) {
       const t = props.t
       const [state, setState] = React.useState({ status: 'loading' })
       const [copyState, setCopyState] = React.useState('idle')
+      const [pluginsOpen, setPluginsOpen] = React.useState(false)
 
       const load = React.useCallback(async () => {
         setState({ status: 'loading' })
@@ -149,7 +185,9 @@ window.__ModuleLoader__.load({
       }
 
       const { fields, links, notes, plugins } = state.data
-      const fieldRows = Array.isArray(fields) ? fields : []
+      const fieldRows = Array.isArray(fields)
+        ? fields.filter((row) => row.key !== 'pluginCount')
+        : []
       const linkRows = Array.isArray(links) ? links : []
       const noteRows = Array.isArray(notes) ? notes : []
       const pluginRows = Array.isArray(plugins) ? plugins : []
@@ -167,36 +205,48 @@ window.__ModuleLoader__.load({
             ),
           ),
         React.createElement('div', { className: 'dshAbout_plugins' },
-          React.createElement('h3', { className: 'dshAbout_subtitle' }, t('plugins')),
-          pluginRows.length === 0
-            ? React.createElement('p', { className: 'dshAbout_status' }, t('pluginsEmpty'))
-            : React.createElement('div', { className: 'dshAbout_tableWrap' },
-              React.createElement('table', { className: 'dshAbout_table' },
-                React.createElement('thead', null,
-                  React.createElement('tr', null,
-                    React.createElement('th', null, t('colId')),
-                    React.createElement('th', null, t('colModule')),
-                    React.createElement('th', null, t('colVersion')),
-                    React.createElement('th', null, t('colEnabled')),
-                    React.createElement('th', null, t('colPhase')),
+          React.createElement('button', {
+            type: 'button',
+            className: 'dshAbout_pluginsToggle',
+            'aria-expanded': pluginsOpen ? 'true' : 'false',
+            'aria-label': pluginsOpen ? t('pluginsCollapse') : t('pluginsExpand'),
+            onClick: () => setPluginsOpen((open) => !open),
+          },
+            React.createElement('span', { className: 'dshAbout_pluginsLabel' }, t('plugins')),
+            React.createElement('span', { className: 'dshAbout_pluginsCount' }, String(pluginRows.length)),
+            React.createElement(Chevron, { open: pluginsOpen }),
+          ),
+          pluginsOpen
+            ? (pluginRows.length === 0
+              ? React.createElement('p', { className: 'dshAbout_status' }, t('pluginsEmpty'))
+              : React.createElement('div', { className: 'dshAbout_tableWrap' },
+                React.createElement('table', { className: 'dshAbout_table' },
+                  React.createElement('thead', null,
+                    React.createElement('tr', null,
+                      React.createElement('th', null, t('colId')),
+                      React.createElement('th', null, t('colModule')),
+                      React.createElement('th', null, t('colVersion')),
+                      React.createElement('th', null, t('colEnabled')),
+                      React.createElement('th', null, t('colPhase')),
+                    ),
                   ),
-                ),
-                React.createElement('tbody', null,
-                  ...pluginRows.map((row) =>
-                    React.createElement('tr', { key: row.entryId },
-                      React.createElement('td', null, row.entryId),
-                      React.createElement('td', null, row.moduleName),
-                      React.createElement('td', null, row.version ?? t('versionNull')),
-                      React.createElement('td', null, row.enabled ? t('enabledYes') : t('enabledNo')),
-                      React.createElement('td', {
-                        className: 'dshAbout_phase',
-                        'data-phase': row.fiberPhase ?? '',
-                      }, row.fiberPhase ?? t('phaseNull')),
+                  React.createElement('tbody', null,
+                    ...pluginRows.map((row) =>
+                      React.createElement('tr', { key: row.entryId },
+                        React.createElement('td', null, row.entryId),
+                        React.createElement('td', null, row.moduleName),
+                        React.createElement('td', null, row.version ?? t('versionNull')),
+                        React.createElement('td', null, row.enabled ? t('enabledYes') : t('enabledNo')),
+                        React.createElement('td', {
+                          className: 'dshAbout_phase',
+                          'data-phase': row.fiberPhase ?? '',
+                        }, row.fiberPhase ?? t('phaseNull')),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
+              ))
+            : null,
         ),
         linkRows.length > 0
           ? React.createElement(React.Fragment, null,
