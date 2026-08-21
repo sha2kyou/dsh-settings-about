@@ -30,14 +30,10 @@ dsh plugin --profile web add github:sha2kyou/dsh-settings-about
 dsh web
 ```
 
-Other sources:
+Local checkout:
 
 ```sh
-# local checkout
 dsh plugin --profile web add /path/to/dsh-settings-about
-
-# npm pack tarball
-npm pack && dsh plugin --profile web add ./dsh-settings-about-0.1.3.tgz
 ```
 
 Then open **Settings → About**.

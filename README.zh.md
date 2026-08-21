@@ -30,14 +30,10 @@ dsh plugin --profile web add github:sha2kyou/dsh-settings-about
 dsh web
 ```
 
-其他来源：
+本地目录：
 
 ```sh
-# 本地目录
 dsh plugin --profile web add /path/to/dsh-settings-about
-
-# tarball
-npm pack && dsh plugin --profile web add ./dsh-settings-about-0.1.3.tgz
 ```
 
 然后打开 **设置 → 关于**。
