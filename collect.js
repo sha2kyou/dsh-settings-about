@@ -394,7 +394,7 @@ export function collectAboutSnapshot(options = {}) {
 
     const browse = repositoryBrowseUrl(pkg.repository)
     if (browse !== undefined) {
-      links.push({ label: 'Repository', url: browse })
+      links.push({ label: 'dsh', url: browse })
       const directory =
         pkg.repository !== null
         && typeof pkg.repository === 'object'
@@ -475,6 +475,17 @@ export function collectAboutSnapshot(options = {}) {
   const ownPkg = readPackageJson(join(dirname(fileURLToPath(import.meta.url)), 'package.json'))
   if (typeof ownPkg?.version === 'string' && typeof ownPkg?.name === 'string') {
     push('aboutPlugin', 'About plugin', `${ownPkg.name}@${ownPkg.version}`)
+  }
+  // Below the dsh repo link: this plugin's own GitHub URL from its package.json.
+  const aboutBrowse =
+    ownPkg !== undefined ? repositoryBrowseUrl(ownPkg.repository) : undefined
+  if (aboutBrowse !== undefined) {
+    links.push({
+      label: typeof ownPkg?.name === 'string' ? ownPkg.name : 'dsh-settings-about',
+      url: aboutBrowse,
+    })
+  } else if (ownPkg !== undefined) {
+    notes.push('About plugin package.json has no convertible repository.url; plugin repo link omitted.')
   }
 
   /** @type {InstalledPlugin[]} */
