@@ -2,16 +2,14 @@
  * Host half: expose a read-only About snapshot over HTTP for the settings UI.
  * Values come only from collectAboutSnapshot (running process + official APIs).
  */
-import { createRequire } from 'node:module'
 import { realpathSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
   collectAboutSnapshot,
+  deriveProfileName,
   listInstalledPlugins,
-  profileNameFromArgv,
-  profileNameFromHomeLinks,
-  profileNameFromPluginPath,
+  loadHomePaths,
   resolveRunningDshPackage,
 } from './collect.js'
 
@@ -32,8 +30,7 @@ function versionAnchors(selfPath) {
   let resolvedHome
   if (running !== undefined) {
     try {
-      const homePaths = createRequire(running.path)('@deepseek-ai/dsh-home-paths')
-      resolvedHome = homePaths.resolveDshHome()
+      resolvedHome = loadHomePaths(running.path)?.resolveDshHome()
     } catch {
       resolvedHome = undefined
     }
@@ -47,12 +44,7 @@ function versionAnchors(selfPath) {
     packageRootReal = undefined
   }
 
-  const profile =
-    profileNameFromArgv()
-    ?? profileNameFromPluginPath(selfPath)
-    ?? (typeof resolvedHome === 'string' && packageRootReal !== undefined
-      ? profileNameFromHomeLinks(resolvedHome, packageRootReal)
-      : undefined)
+  const profile = deriveProfileName(selfPath, resolvedHome, packageRootReal)
 
   if (typeof resolvedHome === 'string' && typeof profile === 'string') {
     anchors.profileDir = join(resolvedHome, 'profiles', profile)

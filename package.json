@@ -4,6 +4,9 @@
   "description": "dsh Settings → About: runtime version, env, and installed plugin inventory (requires @deepseek-ai/dsh@0.1.1-rc.1)",
   "type": "module",
   "main": "index.js",
+  "scripts": {
+    "test": "node --test"
+  },
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",
@@ -15,6 +18,7 @@
     "client.js",
     "cordis.patch.yml",
     "scripts",
+    "docs",
     "LICENSE",
     "README.md",
     "README.zh.md"

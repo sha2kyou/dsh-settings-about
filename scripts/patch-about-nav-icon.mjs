@@ -10,8 +10,6 @@ import { createRequire } from 'node:module'
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
-const require = createRequire(import.meta.url)
-
 function resolveSettingsGeneralClient() {
   const dshEntry = process.argv[2] // optional: path to dsh bin or package.json
   const bases = []
@@ -19,7 +17,7 @@ function resolveSettingsGeneralClient() {
   bases.push('/opt/homebrew/bin/dsh', '/usr/local/bin/dsh')
   for (const base of bases) {
     try {
-      const req = createRequire(base.endsWith('.json') ? base : base)
+      const req = createRequire(base)
       const root = dirname(req.resolve('@deepseek-ai/dsh-client-ui-settings-general/package.json'))
       const client = join(root, 'lib', 'client.js')
       if (existsSync(client)) return client
@@ -70,4 +68,3 @@ if (!text.includes(needle)) {
 copyFileSync(file, `${file}.bak-about-icon`)
 writeFileSync(file, text.replace(needle, insert))
 console.log('patched about → IconWarningOutline16:', file)
-void require

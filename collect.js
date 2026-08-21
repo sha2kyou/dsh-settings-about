@@ -137,7 +137,7 @@ export function resolveRunningDshPackage() {
  * @param {string} dshPackageJsonPath
  * @returns {{ resolveDshHome: (configured?: string, env?: Record<string, string | undefined>) => string, dshHomeDisplay: (resolvedHome: string) => string } | undefined}
  */
-function loadHomePaths(dshPackageJsonPath) {
+export function loadHomePaths(dshPackageJsonPath) {
   try {
     return createRequire(dshPackageJsonPath)('@deepseek-ai/dsh-home-paths')
   } catch {
@@ -231,6 +231,25 @@ export function profileNameFromHomeLinks(resolvedHome, packageRoot) {
 }
 
 /**
+ * Derive the running profile name via the fallback chain shared by the host
+ * route and the snapshot builder: launcher argv → plugin path marker → unique
+ * home link. Return undefined when none of the sources resolve.
+ * @param {string} selfPath
+ * @param {string | undefined} resolvedHome
+ * @param {string | undefined} packageRootReal
+ * @returns {string | undefined}
+ */
+export function deriveProfileName(selfPath, resolvedHome, packageRootReal) {
+  return (
+    profileNameFromArgv()
+    ?? profileNameFromPluginPath(selfPath)
+    ?? (typeof resolvedHome === 'string' && packageRootReal !== undefined
+      ? profileNameFromHomeLinks(resolvedHome, packageRootReal)
+      : undefined)
+  )
+}
+
+/**
  * Classify install layout from a real resolved path. Labels only when unambiguous.
  * @param {string} packageJsonPath
  * @returns {{ kind: string, path: string }}
@@ -288,6 +307,9 @@ export function packageNameOfSpecifier(specifier) {
   return name.length > 0 ? name : undefined
 }
 
+/** Max directory hops when walking up to find a package.json that omits exports["./package.json"]. */
+const MAX_PACKAGE_JSON_WALK = 8
+
 /**
  * Read `version` from a package.json resolved through Node's algorithm from `fromFile`.
  * Returns undefined when unresolvable — never invents a version.
@@ -311,7 +333,7 @@ function readPackageVersionFrom(fromFile, packageName) {
   }
   try {
     let dir = dirname(req.resolve(packageName))
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < MAX_PACKAGE_JSON_WALK; i++) {
       const pkg = readPackageJson(join(dir, 'package.json'))
       if (pkg?.name === packageName && typeof pkg.version === 'string') return pkg.version
       const parent = dirname(dir)
@@ -476,12 +498,7 @@ export function collectAboutSnapshot(options = {}) {
   } catch {
     packageRootReal = undefined
   }
-  const profile =
-    profileNameFromArgv()
-    ?? profileNameFromPluginPath(selfPath)
-    ?? (typeof resolvedHome === 'string' && packageRootReal !== undefined
-      ? profileNameFromHomeLinks(resolvedHome, packageRootReal)
-      : undefined)
+  const profile = deriveProfileName(selfPath, resolvedHome, packageRootReal)
 
   if (profile === undefined) {
     notes.push('Profile name unresolved (no --profile/web argv, path marker, or unique home link).')
